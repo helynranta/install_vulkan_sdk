@@ -31,5 +31,5 @@ runs:
           $ProgressPreference = 'SilentlyContinue'    
           Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${{ steps.vulkan_sdk_install_version.outputs.value }}/windows/VulkanSDK-${{ steps.vulkan_sdk_install_version.outputs.value }}-Installer.exe" -OutFile D:/VulkanSDK.exe
         }
-        D:/VulkanSDK.exe --root D:\VulkanSDK --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.debug
+        D:/VulkanSDK.exe --root D:\VulkanSDK\Vulkan-${{ steps.vulkan_sdk_install_version.outputs.value }} --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.debug
         echo "VULKAN_SDK=D:\VulkanSDK" >> $GITHUB_ENV
