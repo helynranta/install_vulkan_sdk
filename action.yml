@@ -1,0 +1,35 @@
+name: 'install vulkan sdk'
+description: 'installs vulkan sdk'
+runs:
+  using: 'composite'
+  steps:  
+    - shell: pwsh
+      id: vulkan_sdk_install_version
+      name: Figure out latest version
+      run: |
+        $ver = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+        echo "VULKAN_SDK_VERSION=$($ver)" >> $GITHUB_ENV
+        echo "VULKAN_SDK_VERSION=$ver"
+        echo "::set-output name=value::$ver"
+
+    - name: Check Vulkan SDK installer cache
+      id: vulkan-cached-sdk
+      uses: actions/cache@v3
+      with:
+        path: "D:/VulkanSDK.exe"
+        key: '${{ runner.os }}-vulkan-prebuilt-sdk-${{ steps.vulkan_sdk_install_version.outputs.value }}'
+
+    - shell: pwsh
+      name: Install Vulkan SDK
+      run: |
+        Write-Host "installing VULKAN_SDK_VERSION ${{ steps.vulkan_sdk_install_version.outputs.value }}"
+        if (Test-Path -Path D:/VulkanSDK.exe) {
+          Write-Host "using cached exe"
+        }
+        else
+        {
+          $ProgressPreference = 'SilentlyContinue'    
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${{ steps.vulkan_sdk_install_version.outputs.value }}/windows/VulkanSDK-${{ steps.vulkan_sdk_install_version.outputs.value }}-Installer.exe" -OutFile D:/VulkanSDK.exe
+        }
+        D:/VulkanSDK.exe --root D:\VulkanSDK --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.debug
+        echo "VULKAN_SDK=D:\VulkanSDK" >> $GITHUB_ENV
